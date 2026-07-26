@@ -27,6 +27,6 @@ const UserSchema = new Schema<IUser>(
   { timestamps: true }
 );
 
-UserSchema.index({ email: 1 });
+// Removed duplicate index — email uniqueness is already enforced by unique:true on the field
 
 export default mongoose.model<IUser>('User', UserSchema);
