@@ -6,8 +6,7 @@ import Journal, { IJournal } from '../models/Journal.model';
 import Artisan, { IArtisan } from '../models/Artisan.model';
 import AIMatch, { IAIMatch } from '../models/AIMatch.model';
 
-//  Workshop 
-
+// Workshop
 export const workshopRepository = {
   findAll: (filter = {}) =>
     Workshop.find(filter).populate('artisanId', 'craft location district'),
@@ -28,8 +27,7 @@ export const workshopRepository = {
     Workshop.findByIdAndDelete(id),
 };
 
-// Booking 
-
+// Booking
 export const bookingRepository = {
   findByUser: (userId: string) =>
     Booking.find({ userId })
@@ -56,7 +54,7 @@ export const bookingRepository = {
     Booking.findByIdAndDelete(id),
 };
 
-// Collection 
+// Collection
 export const collectionRepository = {
   findByUser: (userId: string) =>
     Collection.find({ userId }).sort({ createdAt: -1 }),
@@ -74,7 +72,7 @@ export const collectionRepository = {
     Collection.findByIdAndDelete(id),
 };
 
-//Journey
+// Journey
 export const journeyRepository = {
   findByUser: (userId: string) =>
     Journey.find({ userId }).sort({ createdAt: -1 }),
@@ -95,8 +93,7 @@ export const journeyRepository = {
     Journey.findByIdAndDelete(id),
 };
 
-// journal 
-
+// Journal
 export const journalRepository = {
   findByUser: (userId: string, filter: Record<string, unknown> = {}) =>
     Journal.find({ userId, ...filter }).sort({ visitDate: -1 }),
@@ -114,8 +111,7 @@ export const journalRepository = {
     Journal.findByIdAndDelete(id),
 };
 
-// Artisan 
-
+// Artisan
 export const artisanRepository = {
   findAll: (filter = {}) =>
     Artisan.find(filter).populate('userId', 'name email avatar'),
@@ -131,10 +127,12 @@ export const artisanRepository = {
 
   updateById: (id: string, data: Partial<IArtisan>) =>
     Artisan.findByIdAndUpdate(id, data, { new: true }),
+
+  deleteById: (id: string) =>
+    Artisan.findByIdAndDelete(id),
 };
 
-//  AI Match 
-
+// AI Match
 export const aiMatchRepository = {
   findByUser: (userId: string) =>
     AIMatch.find({ userId }).sort({ createdAt: -1 }),
