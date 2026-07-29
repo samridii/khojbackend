@@ -3,7 +3,7 @@ import asyncHandler from '../utils/asyncHandler';
 import { sendSuccess } from '../utils/response.util';
 import { workshopRepository, artisanRepository } from '../repositories/index.repository';
 
-// ─── Workshop Controller ──────────────────────────────────────────────────
+// Workshop Controller 
 
 export const getAllWorkshops = asyncHandler(async (req: Request, res: Response) => {
   const { craft, district } = req.query;
@@ -56,7 +56,7 @@ export const deleteWorkshop = asyncHandler(async (req: Request, res: Response) =
   sendSuccess(res, null, 'Workshop deleted.');
 });
 
-// ─── Artisan Controller ───────────────────────────────────────────────────
+//Artisan Controller 
 
 export const getAllArtisans = asyncHandler(async (req: Request, res: Response) => {
   const { craft, district } = req.query;

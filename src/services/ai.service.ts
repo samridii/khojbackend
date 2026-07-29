@@ -1,10 +1,18 @@
 import Groq from 'groq-sdk';
 import { aiMatchRepository } from '../repositories/index.repository';
 
-const groq = new Groq({ apiKey: process.env.GROQ_API_KEY });
+// Lazy initialization — only create client when actually needed
+const getGroqClient = () => {
+  if (!process.env.GROQ_API_KEY) {
+    throw new Error('GROQ_API_KEY is not set in your .env file.');
+  }
+  return new Groq({ apiKey: process.env.GROQ_API_KEY });
+};
 
 export const aiService = {
   runCompass: async (userId: string, inputText: string, moodTags: string[]) => {
+    const groq = getGroqClient();
+
     const prompt = `
 You are a cultural guide specialising in Nepal's living heritage.
 
@@ -13,8 +21,7 @@ A user describes their travel mood and interests:
 
 Mood tags: ${moodTags.join(', ')}
 
-Based on this, recommend relevant aspects of Nepali culture.
-Respond ONLY with a valid JSON object in this exact format, nothing else:
+Respond ONLY with a valid JSON object, nothing else:
 {
   "communities": ["name1", "name2"],
   "crafts": ["name1", "name2"],
@@ -22,12 +29,12 @@ Respond ONLY with a valid JSON object in this exact format, nothing else:
   "festivals": ["name1", "name2"],
   "music": ["name1", "name2"],
   "regions": ["name1", "name2"],
-  "culturalInsight": "A warm 2-3 sentence insight connecting the user's mood to Nepali culture.",
+  "culturalInsight": "A warm 2-3 sentence insight.",
   "matchPercent": 92,
   "cultureName": "Primary culture name",
   "tagline": "One sentence describing why this is a match."
 }
-Each array should have 2-4 specific Nepali items. Be accurate and specific to Nepal.
+Each array should have 2-4 specific Nepali items.
     `.trim();
 
     const response = await groq.chat.completions.create({
@@ -37,9 +44,7 @@ Each array should have 2-4 specific Nepali items. Be accurate and specific to Ne
       max_tokens: 1024,
     });
 
-    const raw = response.choices[0].message.content || '{}';
-
-    // Strip any markdown fences if present
+    const raw   = response.choices[0].message.content || '{}';
     const clean = raw.replace(/```json|```/g, '').trim();
     const results = JSON.parse(clean);
 
@@ -63,12 +68,13 @@ Each array should have 2-4 specific Nepali items. Be accurate and specific to Ne
     groupType: string;
     ethnicFocus?: string;
   }) => {
+    const groq = getGroqClient();
     const { userId, durationDays, budget, startCity, travelStyle, interests, groupType, ethnicFocus } = params;
 
     const prompt = `
 You are an expert cultural travel planner for Nepal.
 
-Create a detailed ${durationDays}-day cultural journey with these preferences:
+Create a detailed ${durationDays}-day cultural journey:
 - Budget: ${budget}
 - Starting city: ${startCity}
 - Travel style: ${travelStyle}
@@ -90,15 +96,14 @@ Respond ONLY with a valid JSON object, nothing else:
           "place": "Place name",
           "type": "cultural_site",
           "description": "What to do and see here.",
-          "tip": "Practical tip for visitors."
+          "tip": "Practical tip."
         }
       ],
       "etiquetteTips": ["Tip 1", "Tip 2"]
     }
   ]
 }
-Types for stops: cultural_site, workshop, food, festival, rest.
-Make it immersive, authentic, and grounded in real Nepal geography and culture.
+Stop types: cultural_site, workshop, food, festival, rest.
     `.trim();
 
     const response = await groq.chat.completions.create({
@@ -108,7 +113,7 @@ Make it immersive, authentic, and grounded in real Nepal geography and culture.
       max_tokens: 2048,
     });
 
-    const raw = response.choices[0].message.content || '{}';
+    const raw   = response.choices[0].message.content || '{}';
     const clean = raw.replace(/```json|```/g, '').trim();
     const journeyData = JSON.parse(clean);
 
